@@ -23,12 +23,14 @@ public class SolarCarTelemetry extends Application{
     @Override
     public void start(Stage primaryStage) {
         window=primaryStage;
-        Label Speed =new Label("Speed:");
         
         window.setTitle("SolarCar Telemetry"); //Title of Frame
         //Gonna add panes to this pane
         BorderPane MainPane=new BorderPane();
         MainPane.setPadding(new Insets(5,5,5,5));
+        
+        //Left Panel
+        GridPane leftPane=new GridPane();
         
         //Data Pane
         TilePane DataPane=new TilePane();
@@ -38,6 +40,7 @@ public class SolarCarTelemetry extends Application{
         DataPane.setPrefHeight(60);
         DataPane.setHgap(130);
         
+                
         //Text objects in DataPane
         Text speed = new Text("Speed:");
         Text RPM= new Text("RPM:");
@@ -62,11 +65,23 @@ public class SolarCarTelemetry extends Application{
         
         //Add data to pane
         DataPane.getChildren().addAll(speed,RPM,PConsume,CVoltage,RunTime,Status);
+        //Tabs Pane
+        TabPane tabPane=new TabPane();
+        Tab tab=new Tab();
+        tab.setText("Tab1");
+        tab.setContent(new Rectangle(420,300,Color.BLUE));
+        tab.setClosable(false);
+        Tab tab1=new Tab();
+        tab1.setText("Tab2");
+        tab1.setContent(new Rectangle(420,300,Color.BLUE));
+        tab1.setClosable(false);
+        tabPane.getTabs().add(tab);
+        tabPane.getTabs().add(tab1);
         
         //Map Pane
         StackPane MapPane=new StackPane();
         MapPane.setStyle("-fx-background-color: #CBCBCB;");
-        Rectangle demo = new Rectangle(420, 300);
+        Rectangle demo = new Rectangle(420, 350);
         Text demoText = new Text("MAP GOES HERE");
         demoText.setFill(Color.WHITE); 
         demo.setFill(Color.BLACK); 
@@ -76,11 +91,15 @@ public class SolarCarTelemetry extends Application{
         //Graphs Pane
         StackPane GraphPane=new StackPane();
         
+        //Adding to leftPane
+        leftPane.addRow(0,tabPane);
+        leftPane.addRow(1,MapPane);
+
         //Add all the panes to the MainPane
         //Set the scene as the mainpane and show it on the stage(Frame)
         MainPane.setTop(DataPane);
         MainPane.setRight(GraphPane);
-        MainPane.setLeft(MapPane);
+        MainPane.setLeft(leftPane);
         Scene Main=new Scene(MainPane,1280,720);
         window.setScene(Main);
         window.show();
