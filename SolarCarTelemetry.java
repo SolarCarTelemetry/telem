@@ -14,17 +14,31 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.stage.*;
+import java.util.*;
+import javafx.concurrent.Task;
 
 
-public class SolarCarTelemetry extends Application{
-    Stage window;
+public class SolarCarTelemetry extends Application {
+    /*
+    private class DoWork extends Task<TilePane>{
+        protected TilePane call() throws Exception{
+            int val=0;
+            FileIO s=new FileIO();
+            s.openFile("");
+            while(true){
+                //Read file and add it onto pane
+                d=s.readFile();
+                Thread.sleep(1000);
+                if(isCancelled()){
+                    break;
+                }
+            }
+        }
+
+    }
     
-    
-    @Override
-    public void start(Stage primaryStage) {
-        window=primaryStage;
-        
-        window.setTitle("SolarCar Telemetry"); //Title of Frame
+    */
+    private Scene createContent(){
         //Gonna add panes to this pane
         BorderPane MainPane=new BorderPane();
         MainPane.setPadding(new Insets(5,5,5,5));
@@ -40,7 +54,7 @@ public class SolarCarTelemetry extends Application{
         DataPane.setPrefHeight(60);
         DataPane.setHgap(130);
         
-                
+               
         //Text objects in DataPane
         Text speed = new Text("Speed:");
         Text RPM= new Text("RPM:");
@@ -65,7 +79,8 @@ public class SolarCarTelemetry extends Application{
         
         //Add data to pane
         DataPane.getChildren().addAll(speed,RPM,PConsume,CVoltage,RunTime,Status);
-        //Tabs Pane
+        
+        //Tabs Pane 
         TabPane tabPane=new TabPane();
         Tab tab=new Tab();
         tab.setText("Tab1");
@@ -101,13 +116,18 @@ public class SolarCarTelemetry extends Application{
         MainPane.setRight(GraphPane);
         MainPane.setLeft(leftPane);
         Scene Main=new Scene(MainPane,1280,720);
-        window.setScene(Main);
-        window.show();
-        primaryStage.setFullScreen(true);   //Automatically launches in fullscreen
+        return Main;
+    }
+    
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("SolarCar Telemetry"); //Title of Frame
+        primaryStage.setScene((createContent()));
+        primaryStage.show();
     }
       
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         launch(args);
     }
-    //bryan succs
+    
 }
