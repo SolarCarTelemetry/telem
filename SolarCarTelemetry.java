@@ -14,7 +14,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.stage.*;
-
+import javafx.concurrent.Task;
+import java.util.Random;
 
 public class SolarCarTelemetry extends Application{
     Stage window;
@@ -103,7 +104,24 @@ public class SolarCarTelemetry extends Application{
         Scene Main=new Scene(MainPane,1280,720);
         window.setScene(Main);
         window.show();
-        primaryStage.setFullScreen(true);   //Automatically launches in fullscreen
+        
+        //New task for updating values in real-time
+        Task<Void> task = new Task<Void>(){
+            Random rand = new Random();
+            @Override
+            public Void call() throws Exception{
+                for(int i=0; i<10000; i++){
+                    Platform.runLater(() -> {
+                        speed.setText("Speed: "+rand.nextInt());   
+                        });
+                    Thread.sleep(1000);
+                } 
+            return null;
+            }
+        };
+        Thread th = new Thread(task);
+        th.setDaemon(true);
+        th.start();
     }
       
     public static void main(String[] args) {
