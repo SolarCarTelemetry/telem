@@ -27,10 +27,17 @@ public class SolarCarTelemetry extends Application{
         final NumberAxis xAxis = new NumberAxis();
         final NumberAxis yAxis = new NumberAxis();
         private int series1Count=0;
-        private int[] map1Vals=new int[20];
         final LineChart<Number,Number> line1= new LineChart<Number,Number>(xAxis,yAxis); 
         //Series
         XYChart.Series<Number,Number> series1;
+    //Line Chart
+        //Defining Axis
+        final NumberAxis xAxis2 = new NumberAxis();
+        final NumberAxis yAxis2 = new NumberAxis();
+        private int series2Count=0;
+        final LineChart<Number,Number> line2= new LineChart<Number,Number>(xAxis2,yAxis2); 
+        //Series
+        XYChart.Series<Number,Number> series2;
         
     
     @Override
@@ -50,6 +57,16 @@ public class SolarCarTelemetry extends Application{
         series1=new XYChart.Series<>();
         line1.setAnimated(false);
         line1.getData().addAll(series1);
+        
+        xAxis2.setAutoRanging(false);
+        xAxis2.setForceZeroInRange(false);
+        yAxis2.setLabel("Stuff2");
+        yAxis2.setAutoRanging(false);
+        line2.setTitle("Testing2");
+        series2=new XYChart.Series<>();
+        line2.setAnimated(false);
+        line2.getData().addAll(series2);
+        
         
         prepareTimeline(); //Start
         
@@ -111,9 +128,9 @@ public class SolarCarTelemetry extends Application{
         MapPane.getChildren().addAll(demo, demoText);
         MapPane.setAlignment(Pos.BOTTOM_CENTER);
         //Graphs Pane
-        StackPane GraphPane=new StackPane();
-        GraphPane.getChildren().addAll(line1);
-        GraphPane.setAlignment(Pos.TOP_LEFT);
+        VBox GraphPane=new VBox();
+        GraphPane.getChildren().addAll(line1,line2);
+        GraphPane.setAlignment(Pos.CENTER);
         
         //Adding to leftPane
         leftPane.addRow(0,tabPane);
@@ -156,19 +173,25 @@ public class SolarCarTelemetry extends Application{
     }
     private void addtoSeries(){ 
         try {
-        Thread.sleep(50);
+        Thread.sleep(100);
         } catch (InterruptedException ex) {
             Logger.getLogger(SolarCarTelemetry.class.getName()).log(Level.SEVERE, null, ex);
         }
         Random r=new Random();
+        Random r2=new Random();
         series1.getData().add(new AreaChart.Data(series1Count++,r.nextInt(100-1)+1)); //Give series a value 1 at a time
-        
+        series2.getData().add(new AreaChart.Data(series2Count++,r2.nextInt(100-1)+1));
         if(series1.getData().size() > 50){ //To conserve memory delete when values go past y axis
             series1.getData().remove(0,series1.getData().size()-100);
+        }
+        if(series2.getData().size() > 50){ //To conserve memory delete when values go past y axis
+            series2.getData().remove(0,series2.getData().size()-100);
         }
         //Update xAxis
         xAxis.setLowerBound(series1Count-50);
         xAxis.setUpperBound(series1Count-1);
+        xAxis2.setLowerBound(series2Count-50);
+        xAxis2.setUpperBound(series2Count-1);
     }
     private void prepareTimeline(){
         new AnimationTimer(){
@@ -177,7 +200,7 @@ public class SolarCarTelemetry extends Application{
             }
         }.start();
     }
-      
+    
     public static void main(String[] args) {
         launch(args);
     }
