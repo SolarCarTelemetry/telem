@@ -17,14 +17,17 @@ import javafx.concurrent.Task;
 import javafx.scene.chart.LineChart;
 import javafx.animation.AnimationTimer;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SolarCarTelemetry extends Application{
     Stage window;
     //Line Chart
         //Defining Axis
-        final NumberAxis xAxis = new NumberAxis(0,50,50/10);
+        final NumberAxis xAxis = new NumberAxis();
         final NumberAxis yAxis = new NumberAxis();
         private int series1Count=0;
+        private int[] map1Vals=new int[20];
         final LineChart<Number,Number> line1= new LineChart<Number,Number>(xAxis,yAxis); 
         //Series
         XYChart.Series<Number,Number> series1;
@@ -39,17 +42,17 @@ public class SolarCarTelemetry extends Application{
         MainPane.setPadding(new Insets(5,5,5,5));
         
         //Setting LineChart Paramters
-        xAxis.setLabel("Time");
         xAxis.setAutoRanging(false);
         xAxis.setForceZeroInRange(false);
         yAxis.setLabel("Stuff");
-        yAxis.setAutoRanging(true);
+        yAxis.setAutoRanging(false);
         line1.setTitle("Testing");
         series1=new XYChart.Series<>();
         line1.setAnimated(false);
         line1.getData().addAll(series1);
         
-        prepareTimeline();
+        prepareTimeline(); //Start
+        
         //Left Panel
         GridPane leftPane=new GridPane();
         
@@ -146,41 +149,30 @@ public class SolarCarTelemetry extends Application{
                 return null;
             }
         };
-        //New Task for updating the graph accoridng to data
-        Task<Void> map = new Task<Void>(){
-            @Override
-            public Void call()throws Exception{
-                for(int i=0;i<10000;i++){
-                    Platform.runLater(() -> {
-                    
-                    });
-                    Thread.sleep(100);
-                }
-                return null;
-            }
-        };
-        //Threads
+        //Threading
         Thread thData = new Thread(task);
         thData.setDaemon(true);
         thData.start();
     }
-    private void addtoSeries(){ //Adds Numbers to the series TESTING PURPOSES MUST CHANGE FOR LATER
-        Random r=new Random();
-        for(int i=0;i<20;i++){
-            series1.getData().add(new AreaChart.Data(series1Count++,r.nextInt(100-1)+1));
+    private void addtoSeries(){ 
+        try {
+        Thread.sleep(50);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(SolarCarTelemetry.class.getName()).log(Level.SEVERE, null, ex);
         }
-        if(series1.getData().size() > 100){
+        Random r=new Random();
+        series1.getData().add(new AreaChart.Data(series1Count++,r.nextInt(100-1)+1)); //Give series a value 1 at a time
+        
+        if(series1.getData().size() > 50){ //To conserve memory delete when values go past y axis
             series1.getData().remove(0,series1.getData().size()-100);
         }
-        
         //Update xAxis
-        xAxis.setLowerBound(series1Count-20);
+        xAxis.setLowerBound(series1Count-50);
         xAxis.setUpperBound(series1Count-1);
     }
     private void prepareTimeline(){
         new AnimationTimer(){
             @Override public void handle(long now){
-                
                 addtoSeries();
             }
         }.start();
