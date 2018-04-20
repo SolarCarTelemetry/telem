@@ -19,6 +19,9 @@ import javafx.animation.AnimationTimer;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.*;
+import java.util.Scanner;
+import static solarcartelemetry.Fileio.createFile;
 
 public class SolarCarTelemetry extends Application{
     Stage window;
@@ -39,6 +42,24 @@ public class SolarCarTelemetry extends Application{
         //Series
         XYChart.Series<Number,Number> series2;
         
+        //data fields
+        private static int Speed;
+        private static int RotPerMin;
+        private static int Power;
+        private static int Voltage;
+        private static int Runtime;
+        private static boolean status;
+        static Random rand = new Random();
+        
+    private static void LiveUpdater(){
+        Speed = rand.nextInt((100 - 40) + 1) + 40;
+        RotPerMin = rand.nextInt((2000 - 500) +1) + 500;
+        Power = rand.nextInt(300);
+        Voltage = rand.nextInt(500);
+        Runtime = 10;
+        status = true;
+    }
+        
     
     @Override
     public void start(Stage primaryStage) {
@@ -53,7 +74,7 @@ public class SolarCarTelemetry extends Application{
         xAxis.setForceZeroInRange(false);
         yAxis.setLabel("Stuff");
         yAxis.setAutoRanging(false);
-        line1.setTitle("Testing");
+        line1.setTitle("Speed");
         series1=new XYChart.Series<>();
         line1.setAnimated(false);
         line1.getData().addAll(series1);
@@ -62,7 +83,9 @@ public class SolarCarTelemetry extends Application{
         xAxis2.setForceZeroInRange(false);
         yAxis2.setLabel("Stuff2");
         yAxis2.setAutoRanging(false);
-        line2.setTitle("Testing2");
+        yAxis2.setLowerBound(0);
+        yAxis2.setUpperBound(2000);
+        line2.setTitle("RPM");
         series2=new XYChart.Series<>();
         line2.setAnimated(false);
         line2.getData().addAll(series2);
@@ -149,16 +172,17 @@ public class SolarCarTelemetry extends Application{
         
         //New task for updating values in real-time Used for Datapanel, and updating data
         Task<Void> task = new Task<Void>(){
-            Random rand = new Random();
+            
             @Override
             public Void call() throws Exception{
                 for(int i=0; i<10000; i++){
                     Platform.runLater(() -> {
-                        speed.setText("Speed: "+rand.nextInt()); 
-                        RPM.setText("RPM: "+rand.nextInt());
-                        PConsume.setText("PConsume "+rand.nextInt());
-                        CVoltage.setText("CVoltage: "+rand.nextInt());
-                        RunTime.setText("RunTime: "+rand.nextInt());
+                        SolarCarTelemetry.LiveUpdater();
+                        speed.setText("Speed: "+Speed); 
+                        RPM.setText("RPM: "+RotPerMin);
+                        PConsume.setText("PConsume: "+Power);
+                        CVoltage.setText("CVoltage: "+Voltage);
+                        RunTime.setText("RunTime: "+Runtime);
                         Status.setText("Status: ON");
                         });
                     Thread.sleep(100);
@@ -166,10 +190,35 @@ public class SolarCarTelemetry extends Application{
                 return null;
             }
         };
+        
+        //Task for logging
+        Fileio.Parameters test = new Fileio.Parameters(0, 0, 0);
+        String FileName = "TelemLog.txt";
+        PrintWriter custOutput = createFile("/Users/Arij/Desktop/" + FileName);
+        custOutput.println("Speed:\tRPM:\tVoltage:");
+        //The path to the file is used in the initialization of writing to file
+        Task<Void> log = new Task<Void>(){
+            @Override
+            public Void call() throws Exception{
+                for(int i=0; i<10000; i++){
+                    test.speed = Speed;
+                    test.rpm = RotPerMin;
+                    test.voltage = Voltage;
+                    test.createParameters(test, custOutput);
+                }
+                Thread.sleep(100);
+                return null;
+            }
+        };
+        
         //Threading
         Thread thData = new Thread(task);
         thData.setDaemon(true);
         thData.start();
+        
+        Thread thLog = new Thread(log);
+        thLog.setDaemon(false);
+        thLog.start();
     }
     private void addtoSeries(){ 
         try {
@@ -177,10 +226,9 @@ public class SolarCarTelemetry extends Application{
         } catch (InterruptedException ex) {
             Logger.getLogger(SolarCarTelemetry.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Random r=new Random();
-        Random r2=new Random();
-        series1.getData().add(new AreaChart.Data(series1Count++,r.nextInt(100-1)+1)); //Give series a value 1 at a time
-        series2.getData().add(new AreaChart.Data(series2Count++,r2.nextInt(100-1)+1));
+        
+        series1.getData().add(new AreaChart.Data(series1Count++,Speed)); //Give series a value 1 at a time
+        series2.getData().add(new AreaChart.Data(series2Count++, RotPerMin));
         if(series1.getData().size() > 50){ //To conserve memory delete when values go past y axis
             series1.getData().remove(0,series1.getData().size()-100);
         }
@@ -200,9 +248,11 @@ public class SolarCarTelemetry extends Application{
             }
         }.start();
     }
-    
+      
     public static void main(String[] args) {
         launch(args);
+        
     }
     //bryan succs
 }
+
